@@ -1,1 +1,0 @@
-irezvov@samsung.12163:1387901618
