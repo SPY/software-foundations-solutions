@@ -1094,14 +1094,5 @@ Proof.
     reflexivity. reflexivity.
 Qed.
 
-Theorem plus_0_r_firsttry :
-  forall n,
-  n + 0 = n.
-Proof.       
-  intros n. induction n as [| n'].
-  reflexivity.
-  simpl.
-  rewrite <- IHn'.
-  reflexivity.
 (* $Date: 2013-07-17 16:19:11 -0400 (Wed, 17 Jul 2013) $ *)
 

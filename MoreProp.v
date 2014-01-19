@@ -263,6 +263,32 @@ Inductive R : nat -> nat -> nat -> Prop :=
     [n], and [o], and vice versa?
 *)
 
+Theorem R_is_plus: forall (n m o: nat),
+  R n m o -> n + m = o.
+Proof.
+  intros.
+  induction H.
+  reflexivity.
+  simpl. apply f_equal. apply IHR.
+  rewrite plus_comm. simpl. apply f_equal. rewrite plus_comm. apply IHR.
+  simpl in IHR. inversion IHR. rewrite plus_comm in H1. inversion H1. apply plus_comm.
+  rewrite plus_comm. apply IHR.
+Qed.
+
+Theorem plus_is_R: forall (n m o: nat),
+  n + m = o -> R n m o.
+Proof.
+  induction n.
+  induction m.
+  intros. inversion H. apply c1.
+  intros. simpl in H. simpl in IHm.
+  destruct o. inversion H. inversion H. apply c3.
+  replace (R 0 o o) with (R 0 m o).
+  apply IHm. apply H1. rewrite H1. reflexivity.
+  intros. destruct o. inversion H.
+  inversion H. replace (n + m) with o. apply c2. apply IHn. apply H1.
+Qed.
+
 (* FILL IN HERE *)
 (** [] *)
 
@@ -401,7 +427,7 @@ Definition natural_number_induction_valid : Prop :=
     equivalent to [Peven n] otherwise. *)
 
 Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
-  (* FILL IN HERE *) admit.
+  fun n => if oddb n then Podd n else Peven n.
 
 (** To test your definition, see whether you can prove the following
     facts: *)
@@ -412,7 +438,13 @@ Theorem combine_odd_even_intro :
     (oddb n = false -> Peven n) ->
     combine_odd_even Podd Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros Podd Peven n.
+  intros.
+  unfold combine_odd_even.
+  destruct (oddb n).
+  apply H. reflexivity.
+  apply H0. reflexivity.
+Qed.
 
 Theorem combine_odd_even_elim_odd :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -420,7 +452,8 @@ Theorem combine_odd_even_elim_odd :
     oddb n = true ->
     Podd n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. unfold combine_odd_even in H. rewrite H0 in H. apply H.
+Qed.
 
 Theorem combine_odd_even_elim_even :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -428,7 +461,8 @@ Theorem combine_odd_even_elim_even :
     oddb n = false ->
     Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. unfold combine_odd_even in H. rewrite H0 in H. apply H.
+Qed.
 
 (** [] *)
 
