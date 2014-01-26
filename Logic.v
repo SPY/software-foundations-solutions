@@ -97,7 +97,9 @@ Proof.
 Theorem proj2 : forall P Q : Prop, 
   P /\ Q -> Q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H. apply H1.
+Qed.
 (** [] *)
 
 Theorem and_commut : forall P Q : Prop, 
@@ -121,7 +123,9 @@ Theorem and_assoc : forall P Q R : Prop,
 Proof.
   intros P Q R H.
   inversion H as [HP [HQ HR]].
-(* FILL IN HERE *) Admitted.
+  split.
+  split. apply HP. apply HQ. apply HR.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (even__ev) *)
@@ -137,8 +141,16 @@ Proof.
 Theorem even__ev : forall n : nat,
   (even n -> ev n) /\ (even (S n) -> ev (S n)).
 Proof.
-  (* Hint: Use induction on [n]. *)
-  (* FILL IN HERE *) Admitted.
+  intros. 
+  induction n.
+  split. intros. apply ev_0.
+  intros. inversion H. 
+  split. inversion IHn. apply H0.
+  intros. apply ev_SS.
+  assert (even n) as evenH.
+  unfold even in H. simpl in H. unfold even. apply H.
+  inversion IHn. apply H0. apply evenH.
+Qed.
 (** [] *)
 
 
@@ -178,12 +190,17 @@ Proof.
 Theorem iff_refl : forall P : Prop, 
   P <-> P.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. split. intros. apply H. intros. apply H.
+Qed.
 
 Theorem iff_trans : forall P Q R : Prop, 
   (P <-> Q) -> (Q <-> R) -> (P <-> R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  intros. apply H in H1. apply H0. apply H1.
+  intros. apply H0 in H1. apply H. apply H1.
+Qed.
 
 (** Hint: If you have an iff hypothesis in the context, you can use
     [inversion] to break it into two separate implications.  (Think
@@ -274,14 +291,23 @@ Proof.
 Theorem or_distributes_over_and_2 : forall P Q R : Prop,
   (P \/ Q) /\ (P \/ R) -> P \/ (Q /\ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H.
+  inversion H0.
+  left. apply H2.
+  inversion H1. left. apply H3. right. split. apply H2. apply H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (or_distributes_over_and) *)
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  apply or_distributes_over_and_1. 
+  apply or_distributes_over_and_2.
+Qed.
 (** [] *)
 
 (* ################################################### *)
@@ -319,17 +345,39 @@ Proof.
 Theorem andb_false : forall b c,
   andb b c = false -> b = false \/ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct c.
+  destruct b.
+  inversion H.
+  left. reflexivity.
+  right. reflexivity.
+Qed.
 
 Theorem orb_prop : forall b c,
   orb b c = true -> b = true \/ c = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct b.
+  left. reflexivity.
+  destruct c.
+  right. reflexivity.
+  inversion H.
+Qed.
 
 Theorem orb_false_elim : forall b c,
   orb b c = false -> b = false /\ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct b.
+  destruct c.
+  inversion H.
+  inversion H.
+  split.
+  reflexivity.
+  destruct c.
+  inversion H.
+  reflexivity.
+Qed.
 (** [] *)
 
 
@@ -398,6 +446,8 @@ Proof.
     intution is that [True] should be a proposition for which it is
     trivial to give evidence.) *)
 
+Inductive True : Prop := is_true : forall (P: Prop), P -> True.
+
 (* FILL IN HERE *)
 (** [] *)
 
@@ -463,14 +513,23 @@ Proof.
 Theorem contrapositive : forall P Q : Prop,
   (P -> Q) -> (~Q -> ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not in *.
+  intros. apply H in H1. apply H0 in H1. apply H1.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (not_both_true_and_false) *)
 Theorem not_both_true_and_false : forall P : Prop,
   ~ (P /\ ~P).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  inversion H.
+  apply H1 in H0.
+  apply H0.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, advanced (informal_not_PNP) *)
@@ -495,7 +554,9 @@ Theorem ev_not_ev_S : forall n,
   ev n -> ~ ev (S n).
 Proof. 
   unfold not. intros n H. induction H. (* not n! *)
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H.
+  intros.  inversion H0. apply IHev. apply H2.
+Qed.  
 (** [] *)
 
 (** Note that some theorems that are true in classical logic are _not_
@@ -568,21 +629,43 @@ Theorem false_beq_nat : forall n m : nat,
      n <> m ->
      beq_nat n m = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not in H.
+  destruct (beq_nat n m) eqn: EH.
+  apply ex_falso_quodlibet.
+  apply H.
+  apply beq_nat_true.
+  apply EH.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_false) *)
 Theorem beq_nat_false : forall n m,
   beq_nat n m = false -> n <> m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  assert (beq_nat n m = true) as EH.
+  rewrite H0. symmetry. apply beq_nat_refl.
+  destruct (beq_nat n m).
+  inversion H.
+  inversion EH.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (ble_nat_false) *)
 Theorem ble_nat_false : forall n m,
   ble_nat n m = false -> ~(n <= m).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  apply le_ble_nat in H0.
+  destruct (ble_nat n m).
+  inversion H. inversion H0.
+Qed.
 (** [] *)
 
 
@@ -677,7 +760,13 @@ Proof.
 Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
   (forall x, P x) -> ~ (exists x, ~ P x).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  inversion H0.
+  apply H1.
+  apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (not_exists_dist) *)
@@ -689,7 +778,10 @@ Theorem not_exists_dist :
   forall (X:Type) (P : X -> Prop),
     ~ (exists x, ~ P x) -> (forall x, P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros.
+
+Admitted.
 (** [] *)
 
 (** **** Exercise: 2 stars (dist_exists_or) *)
@@ -699,7 +791,15 @@ Proof.
 Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
   (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  intros. inversion H. inversion H0.
+  left. exists witness. apply H1.
+  right. exists witness. apply H1.
+  intros. inversion H. inversion H0.
+  exists witness. left. apply H1.
+  inversion H0. exists witness. right. apply H1.
+Qed.
 (** [] *)
 
 (* Print dist_exists_or. *)
